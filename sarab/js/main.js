@@ -73,6 +73,84 @@ function closeSearch() {
     document.body.style.overflow = '';
 }
 
+/* LOGIN */
+var loginModal = document.getElementById('loginModal');
+var loginBtn = document.getElementById('loginBtn');
+var loginForm = document.getElementById('loginForm');
+var loginError = document.getElementById('loginError');
+var activeUser = JSON.parse(localStorage.getItem('sarabUser') || sessionStorage.getItem('sarabUser') || 'null');
+
+function updateLoginView() {
+    var loggedIn = Boolean(activeUser);
+    document.getElementById('loginFormView').style.display = loggedIn ? 'none' : 'block';
+    document.getElementById('accountView').style.display = loggedIn ? 'block' : 'none';
+    loginBtn.classList.toggle('logged-in', loggedIn);
+    document.getElementById('loginBtnText').textContent = loggedIn ? activeUser.name : 'Login';
+    if (loggedIn) {
+        document.getElementById('accountName').textContent = 'Welcome, ' + activeUser.name + '!';
+        document.getElementById('accountEmail').textContent = activeUser.email;
+    }
+}
+
+function openLogin() {
+    updateLoginView();
+    loginModal.classList.add('open');
+    loginModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    if (!activeUser) setTimeout(function() { document.getElementById('loginEmail').focus(); }, 220);
+}
+
+function closeLogin() {
+    loginModal.classList.remove('open');
+    loginModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+}
+
+loginBtn.addEventListener('click', openLogin);
+document.getElementById('loginClose').addEventListener('click', closeLogin);
+loginModal.addEventListener('click', function(e) {
+    if (e.target === loginModal) closeLogin();
+});
+
+document.getElementById('togglePassword').addEventListener('click', function() {
+    var password = document.getElementById('loginPassword');
+    var show = password.type === 'password';
+    password.type = show ? 'text' : 'password';
+    this.innerHTML = show ? '<i class="far fa-eye-slash"></i>' : '<i class="far fa-eye"></i>';
+    this.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+});
+
+loginForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    var password = document.getElementById('loginPassword').value;
+    loginError.style.display = 'none';
+
+    if (email !== 'admin@sarabfood.com' || password !== 'sarab123') {
+        loginError.textContent = 'Email atau password salah. Gunakan akun demo di bawah.';
+        loginError.style.display = 'block';
+        return;
+    }
+
+    activeUser = { name: 'Admin', email: email };
+    var storage = document.getElementById('rememberLogin').checked ? localStorage : sessionStorage;
+    localStorage.removeItem('sarabUser');
+    sessionStorage.removeItem('sarabUser');
+    storage.setItem('sarabUser', JSON.stringify(activeUser));
+    loginForm.reset();
+    updateLoginView();
+});
+
+document.getElementById('logoutBtn').addEventListener('click', function() {
+    localStorage.removeItem('sarabUser');
+    sessionStorage.removeItem('sarabUser');
+    activeUser = null;
+    updateLoginView();
+    closeLogin();
+});
+
+updateLoginView();
+
 // Category buttons inside search box
 document.querySelectorAll('.sovcat').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -353,6 +431,7 @@ document.getElementById('gpNext').addEventListener('click', function() {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeSearch();
+        closeLogin();
         closeMenuPop();
         closeGal();
         if (typeof $.magnificPopup !== 'undefined') $.magnificPopup.close();
