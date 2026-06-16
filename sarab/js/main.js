@@ -32,7 +32,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a) {
             // Close Bootstrap mobile navbar if open
             var navCollapse = document.getElementById('navmenu');
             if (navCollapse && navCollapse.classList.contains('show')) {
-                var bsCollapse = bootstrap.Collapse.getInstance(navCollapse);
+            var bsCollapse = bootstrap.Collapse.getOrCreateInstance(navCollapse);
                 if (bsCollapse) {
                     bsCollapse.hide();
                 } else {
@@ -186,8 +186,7 @@ $(document).ready(function() {
 	  mainClass: 'mfp-fade',
 	  removalDelay: 160,
 	  preloader: false,
-	  fixedContentPos: false,
-	  disableOn: 300
+	  fixedContentPos: false
 	});	
 });
 
